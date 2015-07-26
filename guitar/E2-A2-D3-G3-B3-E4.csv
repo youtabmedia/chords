@@ -1,7 +1,7 @@
-Name   ,Short Name,Root,Chord,Frets        ,Fingering  ,CAGED
-C Major,C         ,C   ,M    ,x 3 2 0 1 0  ,x 3 2 0 1 0,     
-       ,          ,    ,     ,x 3 5 5 5 3  ,x 1 2 3 4 1,x    
-       ,          ,    ,     ,8 10 10 9 8 8,1 3 4 2 1 1,x    
-C Minor,Cm        ,C   ,m    ,             ,           ,     
-       
-       
+Name   ,Short Name,Root,Chord,Frets        ,Fingering  ,CAGED,Base String,Base Fret
+C Major,C         ,C   ,M    ,x 3 2 0 1 0  ,x 3 2 0 1 0,     ,,
+       ,          ,    ,     ,,,A,5,3
+       ,          ,    ,     ,,,E,6,5
+C Minor,Cm        ,C   ,m    ,,,Am,5,3
+       ,,,,,,,,
+       ,,,,,,,,
