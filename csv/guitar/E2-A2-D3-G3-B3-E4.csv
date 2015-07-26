@@ -1,6 +1,4 @@
 Name   ,Short Name,Root,Chord,Frets        ,Fingering  ,CAGED Order
-C Major,C         ,C   ,,x 3 2 0 1 0  ,x 3 2 0 1 0,     
-       ,          ,    ,     ,,,A E
+C Major,C         ,C   ,,x 3 2 0 1 0  ,x 3 2 0 1 0,A E
 C Minor,Cm        ,C   ,m    ,,,A E
-D Major,Dm,D,m    ,x x 0 2 3 2,x x 0 1 2 3,
-,,,,,,A E
+D Major,Dm,D,m    ,x x 0 2 3 2,x x 0 1 2 3,A E
