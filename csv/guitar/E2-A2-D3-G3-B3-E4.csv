@@ -10,6 +10,9 @@ F Minor,Fm,F,m    ,,,E A
 G Major,G,G,,3 2 0 0 0 3,3 2 0 0 0 4,E A
 G Minor,Gm,G,m    ,,,E A
 A Major,A,A,,X 0 2 2 2 0,X 0 1 2 3 0,E
+A Major 7,A7,A,7,X 0 2 0 2 0,X 0 1 0 3 0,
+,,,,X 0 2 2 2 3,X 0 1 2 3 4,
+,,,,X 0 2 0 2 3,X 0 1 0 3 4,E
 A Minor,Am,A,m    ,X 0 2 2 1 0,X 0 2 3 1 0,E
 B Major,B,B,,,,A E
 B Minor,Bm,B,m    ,,,A E
