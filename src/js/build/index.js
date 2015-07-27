@@ -1,56 +1,59 @@
 var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
+var async = require('async');
+
 var _ = require('underscore');
 var string = require('underscore.string');
 
 var src = path.join(process.cwd(), 'csv/**/*.csv');
 
-var CSVParser = require('../parsers/CSVParser');
+var FrettedInstrumentParser = require('./parsers/FrettedInstrumentParser');
 
-glob(src, {}, onGotFileList);
+var parsers_ = {
+    guitar: new FrettedInstrumentParser(),
+    ukelele: new FrettedInstrumentParser(),
+    banjo: new FrettedInstrumentParser()
+};
 
-var result = {};
-function onGotFileList(error, files) {
+glob(src, {}, function(error, files) {
     if (error) {
         throw error;
     }
-    _.forEach(files, function(file) {
-        var pair = _.last(file.split('/'), 2);
-        var instrument = pair[0];
-        var tuning = pair[1].replace('.csv', '');
-        var inst = result[instrument];
-        if (!inst) {
-            result[instrument] = inst = {};
-        }
-        inst[tuning] = parseCSV(
-          tuning,
-          fs.readFileSync(file, {encoding: 'utf8'})
-        );
+    var operations = _.map(files, function(file) {
+        var descriptor = _.last(file.split('/'), 2);
+        var instrument = descriptor[0];
+        var tuning = descriptor[1].replace('.csv', '');
+        return function(callback) {
+            fs.readFile(file, {encoding: 'utf8'}, function(error, csv) {
+                if (error) {
+                    callback(error);
+                    return;
+                }
+                parsers_[instrument].parse(instrument, tuning, csv, callback);
+            });
+
+        };
     });
-    console.log(JSON.stringify(result, null, 2));
+    async.parallel(operations, done);
+});
+
+function done(error, results) {
+    console.log(error);
+    console.log(results);
 }
 
-function parseCSV(tuning, csv) {
-    var p = new CSVParser()
-      .setStartLine(1)
-      .addColumnParser('name', basic)
-      .addColumnParser('aliases', basic)
-      .addColumnParser('root', basic)
-      .addColumnParser('chord', basic)
-      .addColumnParser('frets', basic)
-      .addColumnParser('fingering', basic)
-      .addColumnParser('cagedOrder', basic)
-      .addColumnParser('fingeringWhenUsedAsCaged', basic)
-      .parse(csv, function() {
-          console.log('parsed', arguments);
-      });
-    //return _.chain(csv.split('\n'))
-    //  .rest(1)
-    //  .map(parseLine)
-    //  .compact()
-    //  .value();
-}
+
+//function parseCSV(tuning, csv) {
+//.parse(csv, function() {
+//        console.log('parsed', arguments);
+//    });
+//    //return _.chain(csv.split('\n'))
+//    //  .rest(1)
+//    //  .map(parseLine)
+//    //  .compact()
+//    //  .value();
+//}
 
 var columns = [
     {
@@ -105,6 +108,17 @@ function basic(value) {
     }
     return string.trim(value);
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**

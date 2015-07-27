@@ -12,32 +12,10 @@ CSVParser = function () {
     this.columns_ = [];
 
     /**
-     * @type {Array}
-     * @private
-     */
-    this.result_ = [];
-
-    /**
-     * @type {string}
-     * @private
-     */
-    this.delimiter_ = ',';
-
-    /**
      * @type {number}
      * @private
      */
     this.startRow_ = 0;
-};
-
-/**
- * @return {CSVParser}
- */
-CSVParser.prototype.reset = function() {
-    this.startRow_ = 0;
-    this.columns_ = [];
-    this.result_ = [];
-    return this;
 };
 
 /**
@@ -49,6 +27,11 @@ CSVParser.prototype.setStartLine = function(value) {
     return this;
 };
 
+/**
+ * @param {string} key
+ * @param {function(string):*} parser
+ * @return {CSVParser}
+ */
 CSVParser.prototype.addColumnParser = function(key, parser) {
     this.columns_.push({
         key: key,
@@ -57,18 +40,35 @@ CSVParser.prototype.addColumnParser = function(key, parser) {
     return this;
 };
 
+/**
+ * @param {string} source
+ * @param {Function} callback
+ * @return {CSVParser}
+ */
 CSVParser.prototype.parse = function(source, callback) {
-    csv.parse(source, _.bind(this.onParsed_, this, callback));
+    this.callback_ = callback;
+    csv.parse(source, _.bind(this.done_, this));
     return this;
 };
 
-CSVParser.prototype.onParsed_ = function(callback, error, result) {
+/**
+ * @param {Error} error
+ * @param {Array.<Array.<string>>} rows
+ * @private
+ */
+CSVParser.prototype.done_ = function(error, rows) {
     if (error) {
-        callback(error);
-        return;
+        this.callback_(error);
+    } else {
+        var items = null;
+        try {
+            items = _.map(_.rest(rows, this.startRow_), this.parseRow_, this);
+        } catch (error) {
+        }
+        this.callback_(error, items);
     }
-    this.result_ = _.map(_.rest(result, this.startRow_), this.parseRow_, this);
-    callback(null, this.result_);
+    this.callback_ = null;
+    this.columns_ = null;
 };
 
 CSVParser.prototype.parseRow_ = function(row) {
