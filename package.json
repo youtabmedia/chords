@@ -18,9 +18,10 @@
   },
   "homepage": "https://github.com/youtabmedia/chords#readme",
   "dependencies": {
+    "csv": "^0.4.5",
+    "glob": "^5.0.14",
     "underscore": "^1.8.3",
-    "underscore.string": "^3.1.1",
-    "glob": "^5.0.14"
+    "underscore.string": "^3.1.1"
   },
   "devDependencies": {}
 }
