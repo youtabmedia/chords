@@ -7,7 +7,7 @@ var async = require('async');
 var _ = require('underscore');
 var string = require('underscore.string');
 
-var src = path.join(process.cwd(), 'static/**/*.static');
+var src = path.join(process.cwd(), 'static/instruments/**/*.csv');
 var dest = path.join(process.cwd(), 'dist');
 
 var FrettedInstrumentParser = require('./parsers/FrettedInstrumentParser');

@@ -59,7 +59,6 @@ FrettedInstrumentParser.prototype.assemble_ = function(error, sourceChordList) {
     }
 
     this.csvParser_ = this.csvParser_.destroy();
-
     this.createGAGEDSources_(sourceChordList);
     this.done_(null, sourceChordList)
 };
@@ -86,6 +85,8 @@ FrettedInstrumentParser.prototype.createGAGEDSources_ = function(sourceChordList
             })
         }
     }, this);
+
+    console.log(JSON.stringify(this.cagedSourceChords_, null, 2));
 };
 
 FrettedInstrumentParser.prototype.assembleGroups_ = function(row, index, rows) {
