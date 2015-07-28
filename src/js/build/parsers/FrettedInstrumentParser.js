@@ -101,7 +101,7 @@ FrettedInstrumentParser.prototype.createGAGEDSources_ = function(sourceChordList
         }
     }, this);
 
-    this.transform('D', '7', 'A');
+    this.transform('C', 'dim', 'Bb');
 
     // console.log(JSON.stringify(this.cagedSourceChords_, null, 2));
 };
@@ -137,12 +137,13 @@ FrettedInstrumentParser.prototype.transform = function(root, chord, caged) {
     }
 
     var distance = this.getDistance(this.openStrings_[stringNum], root) - rootFret;
-    var transposed = this.transpose(cagedChord.frets, distance);
+    var transposedFrets = this.transposeFrets(cagedChord.frets, distance);
+    // var transposedFingering = this.transposeFrets(cagedChord.frets, distance);
 
-    console.log('interpolated', transposed);
+    console.log('frets', transposedFrets);
 };
 
-FrettedInstrumentParser.prototype.transpose = function(frets, distance) {
+FrettedInstrumentParser.prototype.transposeFrets = function(frets, distance) {
     return _.map(frets, function(fret) {
         if (fret < 0) {
             return fret;
