@@ -15,7 +15,7 @@ module.exports = exports = {
      */
     aliasList: function(source) {
         if (!source) {
-            return null;
+            return ['M']
         }
         return _.map(source.split(','), function(value) {
             return string.trim(value);

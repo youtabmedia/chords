@@ -10,6 +10,9 @@ FrettedInstrumentParser = function () {
     this.tuning_ = null;
     this.callback_ = null;
 
+    this.cagedSourceChords_ = {};
+    this.groups_ = [];
+
     /**
      */
     this.csvParser_ = new CSVParser()
@@ -17,7 +20,7 @@ FrettedInstrumentParser = function () {
       .addColumnParser('name', ValueParser.basic)
       .addColumnParser('aliases', ValueParser.aliasList)
       .addColumnParser('root', ValueParser.basic)
-      .addColumnParser('chord', ValueParser.basic)
+      .addColumnParser('chord', ValueParser.aliasList)
       .addColumnParser('frets', ValueParser.positionList)
       .addColumnParser('fingering', ValueParser.positionList)
       .addColumnParser('cagedOrder', ValueParser.stringList)
@@ -38,7 +41,7 @@ FrettedInstrumentParser.prototype.parse = function(instrument, tuning, csv, call
 
     if (_.isEmpty(csv)) {
         this.done_(null, []);
-        return;
+        return this;
     }
     this.csvParser_.parse(csv, _.bind(this.assemble_, this));
     return this;
@@ -49,7 +52,50 @@ FrettedInstrumentParser.prototype.assemble_ = function(error, rows) {
         this.done_(error);
         return;
     }
+
+    var name;
+    var group;
+    // _.forEach(rows, this.assembleGroups_, this);
+
+    // console.log(JSON.stringify(this.groups_, null, 2));
+    // this.summarize_();
+    this.createGAGEDSources_(rows);
     this.done_(null, rows)
+};
+FrettedInstrumentParser.prototype.createGAGEDSources_ = function(rows) {
+    _.forEach(rows, function(sourceChord) {
+        var fingering = sourceChord.fingeringWhenUsedAsCaged || sourceChord.fingering;
+        if (sourceChord.name && fingering) {
+            var rootContainer = this.cagedSourceChords_[sourceChord.root];
+            if (!rootContainer) {
+                rootContainer = this.cagedSourceChords_[sourceChord.root] = {};
+            }
+            console.log(_.isArray(sourceChord.chord));
+            rootContainer[sourceChord.chord] = fingering;
+        }
+    }, this);
+    // console.log(JSON.stringify(this.cagedSourceChords_, null, 2));
+};
+
+FrettedInstrumentParser.prototype.assembleGroups_ = function(row, index, rows) {
+    var group;
+    if (row.name) {
+        group = [];
+        this.groups_.push(group);
+    } else {
+        group = _.last(this.groups_);
+    }
+    group.push(row);
+};
+
+FrettedInstrumentParser.prototype.summarize_ = function() {
+    _.forEach(this.groups_, function(group) {
+        var first = _.first(group);
+        console.log(first.name);
+        _.forEach(group, function(chord) {
+            console.log('\t', first.name, first.aliases, chord.fingering, chord.cagedOrder);
+        })
+    }, this)
 };
 
 

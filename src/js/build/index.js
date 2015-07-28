@@ -41,8 +41,8 @@ glob(src, {}, function(error, files) {
 });
 
 function done(error, results) {
-    console.log(error);
-    console.log(JSON.stringify(results, null, 2));
+    // console.log(error);
+    // console.log(JSON.stringify(results, null, 2));
     console.timeEnd('parsing took:');
     fs.writeFile(
       path.join(dest, 'chords.json'),
