@@ -42,11 +42,11 @@ module.exports = exports = {
             return null;
         }
         return _.map(source.split(' '), function(value) {
-            var val = parseInt(value);
-            if (isNaN(val)) {
+            var num = parseInt(value);
+            if (isNaN(num)) {
                 return -1;
             }
-            return value;
+            return num;
         });
     }
 };
