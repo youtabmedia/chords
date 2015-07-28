@@ -1,3 +1,4 @@
+console.time('parsing took:');
 var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
@@ -7,12 +8,13 @@ var _ = require('underscore');
 var string = require('underscore.string');
 
 var src = path.join(process.cwd(), 'csv/**/*.csv');
+var dest = path.join(process.cwd(), 'dist');
 
 var FrettedInstrumentParser = require('./parsers/FrettedInstrumentParser');
 
 var parsers_ = {
     guitar: new FrettedInstrumentParser(),
-    ukelele: new FrettedInstrumentParser(),
+    ukulele: new FrettedInstrumentParser(),
     banjo: new FrettedInstrumentParser()
 };
 
@@ -41,6 +43,15 @@ glob(src, {}, function(error, files) {
 function done(error, results) {
     console.log(error);
     console.log(JSON.stringify(results, null, 2));
+    console.timeEnd('parsing took:');
+    fs.writeFile(
+      path.join(dest, 'chords.json'),
+      JSON.stringify(results, null, 2),
+      {encoding: 'utf8'},
+      function(error) {
+          console.log(error ? error.message : 'created output');
+      }
+    );
 }
 
 /**
