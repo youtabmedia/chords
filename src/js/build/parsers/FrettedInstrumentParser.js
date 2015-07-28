@@ -136,7 +136,7 @@ FrettedInstrumentParser.prototype.transform = function(root, chord, caged) {
         return null;
     }
 
-    var distance = this.getDistance(this.openStrings_[stringNum], root) - rootFret;
+    var distance = this.getPositiveSemiToneDistance(this.openStrings_[stringNum], root) - rootFret;
     var transposedFrets = this.transposeFrets(cagedChord.frets, distance);
     // var transposedFingering = this.transposeFrets(cagedChord.frets, distance);
 
@@ -152,7 +152,7 @@ FrettedInstrumentParser.prototype.transposeFrets = function(frets, distance) {
     });
 };
 
-FrettedInstrumentParser.prototype.getDistance = function(start, end) {
+FrettedInstrumentParser.prototype.getPositiveSemiToneDistance = function(start, end) {
     var interval = teoria.note(start).interval(teoria.note(end)).semitones();
     if (interval < 0) {
         interval += 12;
