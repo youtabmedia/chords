@@ -3,7 +3,7 @@
     "aliases": ["Guitar", "Electric Guitar", "Acoustic Guitar"],
     "tunings": {
       "E2-A2-D3-G3-B3-E4": {
-        "aliases": "Standard Tuning"
+        "aliases": ["Standard Tuning"]
       }
     }
   },
@@ -16,7 +16,7 @@
     }
   },
   "banjo": {
-    "aliases": ["Ukulele", "Ukelele", "Uke"],
+    "aliases": ["Banjo"],
     "tunings": {
       "G4-D3-G3-B3-D4": {
         "aliases": "Standard Tuning"

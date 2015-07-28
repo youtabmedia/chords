@@ -19,6 +19,15 @@ CSVParser = function () {
 };
 
 /**
+ * @return {null}
+ */
+CSVParser.prototype.destroy = function() {
+    this.callback_ = null;
+    this.columns_ = null;
+    return null;
+};
+
+/**
  * @param {number} value
  * @return {CSVParser}
  */
@@ -67,8 +76,6 @@ CSVParser.prototype.done_ = function(error, rows) {
         }
         this.callback_(error, items);
     }
-    this.callback_ = null;
-    this.columns_ = null;
 };
 
 CSVParser.prototype.parseRow_ = function(row) {
