@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/youtabmedia/chords#readme",
   "dependencies": {
+    "async": "^1.4.0",
     "csv": "^0.4.5",
     "glob": "^5.0.14",
     "underscore": "^1.8.3",

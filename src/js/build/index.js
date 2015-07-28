@@ -40,86 +40,8 @@ glob(src, {}, function(error, files) {
 
 function done(error, results) {
     console.log(error);
-    console.log(results);
+    console.log(JSON.stringify(results, null, 2));
 }
-
-
-//function parseCSV(tuning, csv) {
-//.parse(csv, function() {
-//        console.log('parsed', arguments);
-//    });
-//    //return _.chain(csv.split('\n'))
-//    //  .rest(1)
-//    //  .map(parseLine)
-//    //  .compact()
-//    //  .value();
-//}
-
-var columns = [
-    {
-        key: 'name',
-        parser: basic
-    },
-    {
-        key: 'shortName',
-        parser: basic
-    },
-    {
-        key: 'root',
-        parser: basic
-    },
-    {
-        key: 'chord',
-        parser: basic
-    },
-    {
-        key: 'frets',
-        parser: basic
-    },
-    {
-        key: 'fingering',
-        parser: basic
-    },
-    {
-        key: 'cagedOrder',
-        parser: basic
-    },
-    {
-        key: 'cagedSource',
-        parser: basic
-    }
-];
-
-function parseLine(line) {
-    if (!line) {
-        return null;
-    }
-    var parts = line.split(',');
-    var ret = {};
-    _.forEach(columns, function(column, index) {
-        ret[column.key] = column.parser(parts[index]);
-    });
-    return ret;
-}
-
-function basic(value) {
-    if (!_.isString(value)) {
-        return null;
-    }
-    return string.trim(value);
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * @typedef {{

@@ -1,6 +1,7 @@
 var _ = require('underscore');
 var string = require('underscore.string');
 var CSVParser = require('./CSVParser');
+var ValueParser = require('./ValueParser');
 /**
  * @constructor
  */
@@ -13,14 +14,14 @@ FrettedInstrumentParser = function () {
      */
     this.csvParser_ = new CSVParser()
       .setStartLine(1)
-      .addColumnParser('name', this.basic_)
-      .addColumnParser('aliases', this.basic_)
-      .addColumnParser('root', this.basic_)
-      .addColumnParser('chord', this.basic_)
-      .addColumnParser('frets', this.basic_)
-      .addColumnParser('fingering', this.basic_)
-      .addColumnParser('cagedOrder', this.basic_)
-      .addColumnParser('fingeringWhenCaged', this.basic_)
+      .addColumnParser('name', ValueParser.basic)
+      .addColumnParser('aliases', ValueParser.aliasList)
+      .addColumnParser('root', ValueParser.basic)
+      .addColumnParser('chord', ValueParser.basic)
+      .addColumnParser('frets', ValueParser.positionList)
+      .addColumnParser('fingering', ValueParser.positionList)
+      .addColumnParser('cagedOrder', ValueParser.stringList)
+      .addColumnParser('fingeringWhenUsedAsCaged', ValueParser.positionList)
 };
 
 /**
@@ -59,10 +60,6 @@ FrettedInstrumentParser.prototype.done_ = function(error, data) {
         data: data
     });
     this.callback_ = null;
-};
-
-FrettedInstrumentParser.prototype.basic_ = function(value) {
-    return string.trim(value || '') || null;
 };
 
 module.exports = exports = FrettedInstrumentParser;
