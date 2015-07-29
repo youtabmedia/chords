@@ -55,4 +55,9 @@ app.use(function(err, req, res, next) {
 });
 
 
+setTimeout(function() {
+    require('open')('http://localhost:4000/')
+}, 1000);
+
+
 module.exports = app;
