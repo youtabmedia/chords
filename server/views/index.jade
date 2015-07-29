@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/bower_components/jtab/css/jtab-helper.css')
+    script(src='/bower_components/jquery/dist/jquery.min.js')
+    script(src='/bower_components/raphael/raphael-min.js')
+    script(src='/bower_components/jtab/javascripts/jtab.js')
+  body
+    h1 Chords
+    each instrument in chords
+      h2= instrument.instrument + ' ' + instrument.tuning
+      div.container
+        each chord in instrument.data
+            - var val = jtab(chord);
+            if val
+              div.jtab.chordonly #{val}
+
+
+

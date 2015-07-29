@@ -101,7 +101,7 @@ FrettedInstrumentParser.prototype.createGAGEDSources_ = function(sourceChordList
         }
     }, this);
 
-    this.transform('C', 'dim', 'Bb');
+    this.caged('C', 'M', 'A');
 
     // console.log(JSON.stringify(this.cagedSourceChords_, null, 2));
 };
@@ -109,11 +109,11 @@ FrettedInstrumentParser.prototype.createGAGEDSources_ = function(sourceChordList
 /**
  * @param {string} root of the source chord
  * @param {string} chord quality
- * @param {string} caged shape
+ * @param {string} shape to use
  * @return {*}
  */
-FrettedInstrumentParser.prototype.transform = function(root, chord, caged) {
-    var rootMap = this.cagedSourceChords_[caged];
+FrettedInstrumentParser.prototype.caged = function(root, chord, shape) {
+    var rootMap = this.cagedSourceChords_[shape];
     if (!rootMap) {
         console.warn('no root map found');
         return null;
