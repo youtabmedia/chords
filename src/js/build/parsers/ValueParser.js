@@ -9,6 +9,12 @@ module.exports = exports = {
     basic: function(source) {
         return string.trim(source || '') || null;
     },
+    baseOrder: function(source) {
+        if (!source) {
+            source = '1';
+        }
+        return parseInt(source) - 1;
+    },
     /**
      * @param {string} source
      * @return {Array.<string> | null}

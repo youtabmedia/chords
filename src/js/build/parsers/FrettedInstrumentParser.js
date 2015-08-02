@@ -37,7 +37,7 @@ FrettedInstrumentParser = function () {
       .addColumnParser('alternateFrets', ValueParser.positionList)
       .addColumnParser('alternateFingering', ValueParser.positionList)
       .addColumnParser('cagedOrder', ValueParser.stringList)
-      .addColumnParser('fingeringWhenUsedAsCaged', ValueParser.positionList)
+      .addColumnParser('base', ValueParser.baseOrder)
 };
 
 /**
@@ -70,6 +70,7 @@ FrettedInstrumentParser.prototype.assemble_ = function(error, sourceChordList) {
         this.done_(error);
         return;
     }
+    console.log(JSON.stringify(sourceChordList, null, 2));
 
     this.csvParser_ = this.csvParser_.destroy();
     this.createGAGEDSources_(sourceChordList);
