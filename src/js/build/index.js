@@ -9,6 +9,7 @@ var string = require('underscore.string');
 
 var src = path.join(process.cwd(), 'static/instruments/**/*.csv');
 var dest = path.join(process.cwd(), 'dist');
+var csv = require('csv');
 
 var FrettedInstrumentParser = require('./parsers/FrettedInstrumentParser');
 
@@ -27,14 +28,26 @@ glob(src, {}, function(error, files) {
         var instrument = descriptor[0];
         var tuning = descriptor[1].replace('.csv', '');
         return function(callback) {
-            fs.readFile(file, {encoding: 'utf8'}, function(error, csv) {
+            fs.readFile(path.join(file), {encoding: 'utf8'}, function onFileRead(error, data) {
+
                 if (error) {
                     callback(error);
                     return;
                 }
-                parsers_[instrument].parse(instrument, tuning, csv, callback);
-            });
 
+                csv.parse(data, {
+                      skip_empty_lines: true,
+                      trim: true
+                  },
+                  function(error, rows) {
+                      if (error) {
+                          callback(error);
+                          return;
+                      }
+                      parsers_[instrument].parse(instrument, tuning, _.rest(rows || []), callback);
+                  });
+            });
+            csv.parse()
         };
     });
     async.parallel(operations, done);
