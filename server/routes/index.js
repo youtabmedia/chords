@@ -26,7 +26,7 @@ function jtab(chord) {
         if (!arr.length) {
             return null;
         }
-        return '%' + arr.join('.') + '[' + chord.aliases.join(', ') + ']';
+        return '%' + arr.join('.') + '[' + chord.aliases_.join(', ') + ']';
     } catch (err) {
         return null
     }

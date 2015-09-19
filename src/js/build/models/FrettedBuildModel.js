@@ -1,58 +1,160 @@
 var _ = require('underscore');
+var str = require('underscore.string');
 var teoria = require('teoria');
+var music = require('../knowledge/music');
+var utils = require('../utils');
+
+/**
+ * @constructor
+ */
+function FrettedBuildModel(tuning) {
+    this.tuning = _.map(this.stringListParser(tuning, '-'), music.extractRoot);
+}
 
 /**
  * @param {Array.<string>} row
  * @param {FrettedBuildModel} prev
- * @constructor
+ * @returns {FrettedBuildModel}
  */
-function FrettedBuildModel(row, prev) {
-    this.sharps_ = {
-        'C': 'C',
-        'C#': 'Db',
-        'D': 'D',
-        'D#': 'Eb',
-        'E': 'E',
-        'E#': 'F',
-        'F': 'F',
-        'F#': 'Gb',
-        'G': 'G',
-        'G#': 'Ab',
-        'A': 'A',
-        'A#': 'Bb',
-        'B': 'B',
-        'B#': 'C'
-    };
+FrettedBuildModel.prototype.deserialize = function(row, prev) {
 
-    this.flats_ = _.extend({'Cb': 'B'}, _.invert(this.sharps_));
-
-    this.priority = 0;
-
+    this.name = '';
     this.displayName = row[0] || prev.displayName;
-    this.aliases = this.stringListParser(row[1]) || prev.aliases;
-    this.bass = row[2] || prev.bass;
-    this.chord = row[3] || prev.chord;
 
-    this.own = {
-        frets: this.fretParser(row[4]),
-        fingering: this.fretParser(row[5])
+    this.priority_ = 0;
+
+    this.aliases_ = this.stringListParser(row[1], ',') || prev.aliases_;
+    this.bass_ = row[2] || prev.bass_;
+    this.chord_ = row[3] || prev.chord_;
+
+    this.own_ = {
+        frets: this.fretListParser(row[4]),
+        fingering: this.fretListParser(row[5])
     };
 
-    this.alternateSources = this.stringListParser(row[6]);
+    this.alternateSources_ = this.stringListParser(row[6], ' ');
 
-    this.alternateDefinitions = {
-        priority: row[8] ? parseInt(row[8]) : 0,
-        frets: this.fretParser(row[9]) || this.own.frets,
-        fingering: this.fretParser(row[10]) || this.own.fingering
+    this.alternateDefinitions_ = {
+        priority_: row[8] ? parseInt(row[8], 10) : 0,
+        frets: this.fretListParser(row[9]) || this.own_.frets,
+        fingering: this.fretListParser(row[10]) || this.own_.fingering
     };
-}
+
+    // validation
+    try {
+        teoria.note(this.bass_);
+    } catch(error) {
+        console.warn('invalid chord', chord);
+    }
+
+    var invalidAliases = [];
+    this.verifiedAliases_ = _.filter(this.aliases_, function(alias) {
+        try {
+            return !!teoria.chord(alias);
+        } catch(error) {
+            invalidAliases.push({
+                alias: alias,
+                error:  error.message
+            });
+        }
+        return false;
+    }, this);
+
+    if (_.isEmpty(this.verifiedAliases_)) {
+        console.log('invalid aliases', invalidAliases);
+        console.log('----');
+    }
+    return this;
+};
+
+/**
+ * @returns {FrettedBuildModel}
+ */
+FrettedBuildModel.prototype.clone = function() {
+    return _.extend(new FrettedBuildModel(), utils.clone(this));
+};
+
+/**
+ * @param {string} value
+ * @returns {FrettedBuildModel}
+ */
+FrettedBuildModel.prototype.setBass = function(value) {
+    this.bass_ = value;
+    return this;
+};
+
+/**
+ * @param {string} value
+ * @returns {FrettedBuildModel}
+ */
+FrettedBuildModel.prototype.setName = function(value) {
+    this.name = value;
+    return this;
+};
 
 /**
  * @param {Object.<string, FrettedBuildModel>} map
  * @returns {FrettedBuildModel}
  */
 FrettedBuildModel.prototype.alternates = function(map) {
+    var alts = _.sortBy(this.alternateDefinitions_, 'priority_');
+    console.log(alts);
     return this;
+};
+
+FrettedBuildModel.prototype.buildUsingDefinition = function(map, ownerList) {
+    if (!_.isEmpty(this.alternateSources_)) {
+        // console.log(this.name, 'has', this.alternateSources_.length, 'alternate sources');
+        // var distance = notes.distanceInSemitones()
+    }
+
+    _.forEach(this.alternateSources_, function(sourceBassNote) {
+        // TODO: offset distance according to bass of first string
+        var sourceName = music.transformChord(this.name, sourceBassNote);
+        var sourceList = map[sourceName];
+        if (_.isEmpty(sourceList)) {
+            console.log('failed finding source', this.name, sourceName);
+            return;
+        }
+
+        var alternates = _.map(sourceList, function(chord) {
+            console.log(chord.getFirstNote());
+        });
+
+    }, this);
+    return this;
+};
+
+FrettedBuildModel.prototype.getFirstNote = function() {
+    var note = null;
+    _.find(this.own_.frets, function(fret, index) {
+        if (fret > -1) {
+            note = this.tuning[index];
+            return true;
+        }
+        return false;
+    }, this);
+    return note;
+};
+
+/**
+ * @param {number} offset
+ * @return {Array.<number>}
+ */
+FrettedBuildModel.prototype.getFretWhenUsedAsDerivate = function(offset) {
+    return _.map(this.alternateDefinitions_.frets || this.own_.frets, function(fret) {
+        if (fret === -1) {
+            return fret;
+        }
+        return fret + offset;
+    });
+};
+
+/**
+ * @return {Array.<number>}
+ */
+FrettedBuildModel.prototype.getFingeringWhenUsedAsDerivate = function() {
+    return this.alternateDefinitions_.fingering || this.own_.fingering;
 };
 
 /**
@@ -60,54 +162,67 @@ FrettedBuildModel.prototype.alternates = function(map) {
  * @returns {FrettedBuildModel}
  */
 FrettedBuildModel.prototype.register = function(map) {
-    _.forEach(this.aliases, function(alias) {
-        var note;
-        try {
-            note = teoria.note(this.bass);
-        } catch (err) {
-            throw new Error('invalid bass note: ' + this.bass);
-        }
-
-        if (alias.indexOf(this.bass) !== 0) {
-            if (note.accidentalValue() === -1) {
-                console.log('mapping', this.bass, this.flats_[this.bass]);
-                map[alias + '/' + this.flats_[this.bass]] = [this];
-            } else if (note.accidentalValue() === 1) {
-                console.log('mapping', this.bass, this.sharps_[this.bass]);
-                map[alias + '/' + this.sharps_[this.bass]] = [this];
-            }
-            map[alias + '/' + this.bass] = [this];
+    _.forEach(this.verifiedAliases_, function(alias) {
+        if (music.extractRoot(alias) === this.bass_) {
+            // not a slash chord
+            this.registerAlias_(alias, null, map);
         } else {
-            map[alias] = [this];
+            // slash chord
+            this.registerAlias_(alias, this.bass_, map);
+            // if slash chord is an accidental register the respective opposite
+            if (music.isAccidental(this.bass_)) {
+                this.registerAlias_(alias, music.reverseAccidental(this.bass_), map);
+            }
         }
-
     }, this);
     return this;
 };
 
-/**
- * @param {string} value
- * @returns {Array.<number> | null}
- */
-FrettedBuildModel.prototype.fretParser = function(value) {
-    if (!value) {
-        return null;
-    }
-    return _.map(value.split(' '), function(value) {
-        var val = parseInt(value, 10);
-        return isNaN(val) ? -1 : val;
-    });
+FrettedBuildModel.prototype.registerAlias_ = function(alias, bass, map) {
+    var name = alias + (bass ? ('/' + bass) : '');
+    var list = map[name] || [];
+    list.push(this.clone()
+        .setBass(bass)
+        .setName(name)
+    );
+    map[name] = list;
 };
 
 /**
  * @param {string} value
- * @returns {Array.<string> | null}
+ * @param {string=} delimiter
+ * @returns {Array.<number> | null}
  */
-FrettedBuildModel.prototype.stringListParser = function(value) {
+FrettedBuildModel.prototype.fretListParser = function(value, delimiter) {
     if (!value) {
         return null;
     }
-    return value.split(' ');
+    delimiter = delimiter || ' ';
+    var ret = _.chain(value.split(delimiter))
+      .map(function(string) {
+          var num = parseInt(utils.removeAllWhiteSpace(string), 10);
+          return isNaN(num) ? -1 : num;
+      })
+      .value();
+    return _.isEmpty(ret) ? null : ret;
+};
+
+/**
+ * @param {string} value
+ * @param {string} delimiter
+ * @returns {Array.<string> | null}
+ */
+FrettedBuildModel.prototype.stringListParser = function(value, delimiter) {
+    if (!value) {
+        return null;
+    }
+
+    var ret = _.chain(value.split(delimiter))
+      .map(utils.removeAllWhiteSpace)
+      .compact()
+      .value();
+
+    return _.isEmpty(ret) ? null : ret;
 };
 
 

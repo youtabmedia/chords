@@ -1,25 +1,25 @@
 {
   "guitar": {
-    "aliases": ["Guitar", "Electric Guitar", "Acoustic Guitar"],
+    "aliases_": ["Guitar", "Electric Guitar", "Acoustic Guitar"],
     "tunings": {
       "E2-A2-D3-G3-B3-E4": {
-        "aliases": ["Standard Tuning"]
+        "aliases_": ["Standard Tuning"]
       }
     }
   },
   "ukulele": {
-    "aliases": ["Ukulele", "Ukelele", "Uke"],
+    "aliases_": ["Ukulele", "Ukelele", "Uke"],
     "tunings": {
       "G4-C4-E4-A4": {
-        "aliases": "Standard Tuning"
+        "aliases_": "Standard Tuning"
       }
     }
   },
   "banjo": {
-    "aliases": ["Banjo"],
+    "aliases_": ["Banjo"],
     "tunings": {
       "G4-D3-G3-B3-D4": {
-        "aliases": "Standard Tuning"
+        "aliases_": "Standard Tuning"
       }
     }
   }

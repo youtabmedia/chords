@@ -27,14 +27,18 @@ FrettedInstrumentParser.prototype.parse = function(instrument, tuning, rows, cal
     this.callback_ = callback;
 
     var buildModel;
-
     _.forEach(rows, function(row) {
-        buildModel = new BuildModel(row, buildModel).register(this.map_);
+        buildModel = new BuildModel(tuning)
+          .deserialize(row, buildModel)
+          .register(this.map_);
     }, this);
 
-    _.forEach(this.map_, function(value, key) {
-        // console.log(key);
-    });
+    _.forEach(this.map_, function(buildModelList, key, map) {
+        // console.log(key, buildModelList.length);
+        _.forEach(buildModelList, function(buildModel) {
+            buildModel.buildUsingDefinition(map, buildModelList);
+        });
+    }, this);
 
     // console.log(this.map_);
 
