@@ -1,11 +1,9 @@
+var _ = require('underscore');
+
 var express = require('express');
 var router = express.Router();
 
-var _ = require('underscore');
-
 var chords = require('../../dist/chords.json');
-
-console.log(chords);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
