@@ -35,9 +35,14 @@ FrettedInstrumentParser.prototype.parse = function(instrument, tuning, rows, cal
 
     _.forEach(this.map_, function(buildModelList, key, map) {
         // console.log(key, buildModelList.length);
+        var results =  buildModelList.concat();
         _.forEach(buildModelList, function(buildModel) {
-            buildModel.buildUsingDefinition(map, buildModelList);
+            buildModel.buildUsingPointers(map, results, buildModel);
         });
+
+        map[key] = _.flatten(results);
+        // console.log(key, results.length);
+
     }, this);
 
     // console.log(this.map_);
@@ -52,7 +57,11 @@ FrettedInstrumentParser.prototype.done_ = function(error) {
     this.callback_(error || null, {
         instrument: this.instrument_,
         tuning: this.tuning_,
-        data: this.map_
+        data: _.mapObject(this.map_, function(chordList) {
+            return _.map(chordList, function(chord) {
+                return chord.serialize();
+            });
+        })
     });
     this.callback_ = null;
 };

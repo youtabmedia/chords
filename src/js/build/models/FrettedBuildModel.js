@@ -32,7 +32,7 @@ FrettedBuildModel.prototype.deserialize = function(row, prev) {
         fingering: this.fretListParser(row[5])
     };
 
-    this.alternateSources_ = this.stringListParser(row[6], ' ');
+    this.derivatePointerNotes_ = this.stringListParser(row[6], ' ');
 
     this.alternateDefinitions_ = {
         priority_: row[8] ? parseInt(row[8], 10) : 0,
@@ -67,6 +67,16 @@ FrettedBuildModel.prototype.deserialize = function(row, prev) {
     return this;
 };
 
+FrettedBuildModel.prototype.serialize = function() {
+    return {
+        displayName: this.displayName,
+        name: this.name,
+        frets: this.own_.frets,
+        fingering: this.own_.fingering// ,
+        // fretsFingering: _.zip(this.own_.frets, this.own_.fingering)
+    }
+};
+
 /**
  * @returns {FrettedBuildModel}
  */
@@ -93,33 +103,68 @@ FrettedBuildModel.prototype.setName = function(value) {
 };
 
 /**
+ * @param {string} value
+ * @returns {FrettedBuildModel}
+ */
+FrettedBuildModel.prototype.setDisplayName = function(value) {
+    this.displayName = value;
+    return this;
+};
+
+/**
  * @param {Object.<string, FrettedBuildModel>} map
  * @returns {FrettedBuildModel}
  */
 FrettedBuildModel.prototype.alternates = function(map) {
     var alts = _.sortBy(this.alternateDefinitions_, 'priority_');
-    console.log(alts);
+    // console.log(alts);
     return this;
 };
 
-FrettedBuildModel.prototype.buildUsingDefinition = function(map, ownerList) {
-    if (!_.isEmpty(this.alternateSources_)) {
-        // console.log(this.name, 'has', this.alternateSources_.length, 'alternate sources');
+FrettedBuildModel.prototype.buildUsingPointers = function(map, results, listItem) {
+    if (!_.isEmpty(this.derivatePointerNotes_)) {
+        // console.log(this.name, 'has', this.derivatePointerNotes_.length, 'alternate sources');
         // var distance = notes.distanceInSemitones()
     }
 
-    _.forEach(this.alternateSources_, function(sourceBassNote) {
+    _.forEach(this.derivatePointerNotes_, function(pointerBassNote) {
         // TODO: offset distance according to bass of first string
-        var sourceName = music.transformChord(this.name, sourceBassNote);
+        var sourceName = music.transformChord(this.name, pointerBassNote);
         var sourceList = map[sourceName];
         if (_.isEmpty(sourceList)) {
             console.log('failed finding source', this.name, sourceName);
             return;
         }
 
-        var alternates = _.map(sourceList, function(chord) {
-            console.log(chord.getFirstNote());
-        });
+        var created = _.chain(sourceList)
+          .map(function(chord) {
+              var firstStringNote = chord.getFirstNote();
+              // console.log(this.name, sourceName, firstStringNote);
+              if (_.isNull(firstStringNote)) {
+                  console.log('mapped to chord with no frets', this.name, sourceName);
+                  return null;
+              }
+              var distance = music.positiveDistanceInSemitones(firstStringNote, this.name);
+              return chord.clone()
+                .setName(this.name)
+                .setDisplayName(this.displayName)
+                .deriveFrets(distance)
+                .deriveFingering();
+          }, this)
+          .compact()
+          .value();
+
+        if (!_.isEmpty(created)) {
+            results.splice(results.indexOf(listItem) + 1, 0, created);
+        }
+
+        //if (music.extractRoot(this.name) === 'C') {
+        //    _.forEach(created, function(c) {
+        //        console.log(c.serialize());
+        //    });
+        //    // console.log(JSON.stringify(created, null, 2));
+        //}
+
 
     }, this);
     return this;
@@ -129,7 +174,7 @@ FrettedBuildModel.prototype.getFirstNote = function() {
     var note = null;
     _.find(this.own_.frets, function(fret, index) {
         if (fret > -1) {
-            note = this.tuning[index];
+            note = music.transposeNote(this.tuning[index], fret);
             return true;
         }
         return false;
@@ -139,22 +184,33 @@ FrettedBuildModel.prototype.getFirstNote = function() {
 
 /**
  * @param {number} offset
- * @return {Array.<number>}
+ * @return {FrettedBuildModel}
  */
-FrettedBuildModel.prototype.getFretWhenUsedAsDerivate = function(offset) {
-    return _.map(this.alternateDefinitions_.frets || this.own_.frets, function(fret) {
+FrettedBuildModel.prototype.deriveFrets = function(offset) {
+    this.own_.frets = _.map(this.alternateDefinitions_.frets || this.own_.frets, function(fret) {
         if (fret === -1) {
             return fret;
         }
         return fret + offset;
     });
+    return this;
 };
 
 /**
- * @return {Array.<number>}
+ * @return {FrettedBuildModel}
  */
-FrettedBuildModel.prototype.getFingeringWhenUsedAsDerivate = function() {
-    return this.alternateDefinitions_.fingering || this.own_.fingering;
+FrettedBuildModel.prototype.deriveFingering = function() {
+    var offset = 0;
+    if (_.isEqual(this.alternateDefinitions_.fingering, this.own_.fingering)) {
+        offset = 1;
+    }
+    this.own_.fingering = _.map(this.alternateDefinitions_.fingering, function(finger) {
+        if (finger === -1) {
+            return finger;
+        }
+        return finger + offset;
+    });
+    return this;
 };
 
 /**

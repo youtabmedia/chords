@@ -59,7 +59,7 @@ function done(error, results) {
     console.timeEnd('parsing took:');
     fs.writeFile(
       path.join(dest, 'chords.json'),
-      JSON.stringify(results, null, 2),
+      JSON.stringify(results),
       {encoding: 'utf8'},
       function(error) {
           console.log(error ? error.message : 'created output');

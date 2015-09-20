@@ -37,23 +37,27 @@ function isNote(value) {
     return !!sharpToFlatMap[value] || !!flatToSharpMap[value];
 }
 
-function distanceInSemitones(from, to, offset) {
-    offset = offset || 0;
-    var normalizedFrom = extractRoot(flatToSharp(from) || from);
-    var start = sharps.indexOf(normalizedFrom);
+function distanceInSemitones(from, to, base) {
+    var offset = base ? indexOfNote(base) : 0;
+    var start = getIndexOfAny(from);
     if (start == -1) {
         throw new Error('invalid from value: ' + from);
     }
-    var normalizedTo = extractRoot(flatToSharp(to) || to);
-    var end = sharps.indexOf(normalizedTo);
+    var end = getIndexOfAny(to);
     if (end === -1) {
         throw new Error('invalid to value: ' + to);
     }
     return (end - start + offset) % 12;
 }
 
-function positiveDistanceInSemitones(from, to, offset) {
-    return (12 + distanceInSemitones(from, to, offset)) % 12;
+function getIndexOfAny(value) {
+    var normalized = extractRoot(value);
+    normalized = flatToSharp(normalized) || normalized;
+    return sharps.indexOf(normalized);
+}
+
+function positiveDistanceInSemitones(from, to, base) {
+    return (12 + distanceInSemitones(from, to, base)) % 12;
 }
 
 function extractRoot(chord) {
@@ -61,10 +65,6 @@ function extractRoot(chord) {
         return chord.substr(0, 2);
     }
     return chord.charAt(0);
-}
-
-function extractBass(chord) {
-    return chord.split('/')[1] || null;
 }
 
 function transformChord(chord, newRoot) {
@@ -103,10 +103,20 @@ function indexOfNote(value) {
     }
 }
 
+function transposeNote(note, offset) {
+    var index = indexOfNote(note) + offset;
+    if (isSharp(note)) {
+        return getNote(index, sharps);
+    } else {
+        return getNote(index, flats);
+    }
+}
+
 exports.reverseAccidental = reverseAccidental;
 exports.isAccidental = isAccidental;
 exports.transformChord = transformChord;
 exports.distanceInSemitones = distanceInSemitones;
 exports.positiveDistanceInSemitones = positiveDistanceInSemitones;
 exports.extractRoot = extractRoot;
+exports.transposeNote = transposeNote;
 
