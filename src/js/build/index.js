@@ -54,50 +54,13 @@ glob(src, {}, function(error, files) {
 });
 
 function done(error, results) {
-    // console.log(error);
-    // console.log(JSON.stringify(results, null, 2));
-    console.timeEnd('parsing took:');
     fs.writeFile(
       path.join(dest, 'chords.json'),
       JSON.stringify(results),
       {encoding: 'utf8'},
       function(error) {
           console.log(error ? error.message : 'created output');
+          console.timeEnd('parsing took:');
       }
     );
 }
-
-/**
- * @typedef {{
- * name: string,
- * shortName: string,
- * root: string,
- * chord: string,
- * diagrams: Array.<Diagram>,
- * CAGED: Diagram
- * }}
- **/
-var Chord;
-
-/**
- * @typedef {{
- * fingering: Array.<number>,
- * frets: Array.<number>,
- * CAGED: string
- * }}
- **/
-var Diagram;
-
-/**
- * @typedef {{
- * name: string,
- * shortName: string,
- * root: string,
- * chord: string,
- * frets: (Array.<number> | null),
- * fingering: (Array.<number> | null),
- * cagedSource: {frets: (Array.<number> | null), fingering: (Array.<number> | null)},
- * cagedOrder: (Array.<string> | null)
- * }}
- **/
-var Parsed;

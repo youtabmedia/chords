@@ -40,7 +40,10 @@ FrettedInstrumentParser.prototype.parse = function(instrument, tuning, rows, cal
             buildModel.buildUsingPointers(map, results, buildModel);
         });
 
-        map[key] = _.flatten(results);
+        map[key] = _.chain(results)
+          .flatten()
+          .compact()
+          .value();
         // console.log(key, results.length);
 
     }, this);
