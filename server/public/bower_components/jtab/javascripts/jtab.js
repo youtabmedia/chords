@@ -447,8 +447,8 @@ jtabChord.prototype.setCustomChordArray = function(){
 };
 
 jtabChord.prototype.parseCustomChordArrayFromToken = function() {
-  sharps = this.fullChordName.replace(/(\%|\[.+\])/g, '');
-  pairs = music.split('.');
+  notes = this.fullChordName.replace(/(\%|\[.+\])/g, '');
+  pairs = notes.split('.');
   if (pairs.length < 6){
     this.isValid = false;
     return;

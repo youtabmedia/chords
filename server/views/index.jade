@@ -10,12 +10,16 @@ html
   body
     h1 Chords
     each instrument in chords
-      h2= instrument.instrument + ' ' + instrument.tuning + ' (' + instrument.data.length + ' chords)'
+      h2= instrument.instrument + ' ' + instrument.tuning
       div.container
-        each chord in instrument.data
-            - var val = jtab(chord);
-            if val
-              div.jtab.chordonly #{val}
+        - var count = 0;
+        each chordList, index in instrument.data
+          each chord in chordList
+            if count++ < 1000
+              - var val = jtab(chord);
+              if val
+                div.jtab.chordonly #{val}
+
 
 
 

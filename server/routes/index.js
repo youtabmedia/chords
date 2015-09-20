@@ -5,6 +5,8 @@ var _ = require('underscore');
 
 var chords = require('../../dist/chords.json');
 
+console.log(chords);
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
     res.render('index', {
@@ -26,7 +28,7 @@ function jtab(chord) {
         if (!arr.length) {
             return null;
         }
-        return '%' + arr.join('.') + '[' + chord.aliases_.join(', ') + ']';
+        return '%' + arr.join('.') + '[' + chord.name + ']';
     } catch (err) {
         return null
     }
