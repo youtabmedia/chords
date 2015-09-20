@@ -2,7 +2,7 @@
   "name": "node-guitar-chords",
   "version": "0.0.0",
   "description": "A chord library for use in musical applications",
-  "main": "dist/chords.json",
+  "main": "index.js",
   "scripts": {
     "install": "node src/js/build/index.js",
     "serve": "node server/app.js",
