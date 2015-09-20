@@ -1,4 +1,4 @@
 *.csv#
 .idea
 node_modules
-dist
+dist/chords.json
