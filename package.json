@@ -1,5 +1,5 @@
 {
-  "name": "chords",
+  "name": "node-guitar-chords",
   "version": "0.0.0",
   "description": "A chord library for use in musical applications",
   "main": "src/js/build/index.js",
@@ -13,7 +13,7 @@
     "url": "git+https://github.com/youtabmedia/chords.git"
   },
   "author": "yotamlaufer",
-  "license": "GPL-2.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/youtabmedia/chords/issues"
   },
