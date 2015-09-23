@@ -9,6 +9,7 @@ var utils = require('../utils');
  */
 function FrettedBuildModel(tuning) {
     this.tuning = _.map(this.stringListParser(tuning, '-'), music.extractRoot);
+    this.priority_ = -1;
 }
 
 /**
@@ -21,8 +22,6 @@ FrettedBuildModel.prototype.deserialize = function(row, prev) {
     this.name = '';
     this.displayName = row[0] || prev.displayName;
 
-    this.priority_ = 0;
-
     this.aliases_ = this.stringListParser(row[1], ',') || prev.aliases_;
     this.bass_ = row[2] || prev.bass_;
     this.chord_ = row[3] || prev.chord_;
@@ -34,8 +33,9 @@ FrettedBuildModel.prototype.deserialize = function(row, prev) {
 
     this.derivatePointerNotes_ = this.stringListParser(row[6], ' ');
 
+    this.priority_ = row[8] ? parseInt(row[8], 10) : 0;
+
     this.alternateDefinitions_ = {
-        priority_: row[8] ? parseInt(row[8], 10) : 0,
         frets: this.fretListParser(row[9]) || this.own_.frets,
         fingering: this.fretListParser(row[10]) || this.own_.fingering
     };
@@ -67,6 +67,13 @@ FrettedBuildModel.prototype.deserialize = function(row, prev) {
     return this;
 };
 
+/**
+ * @return {number}
+ */
+FrettedBuildModel.prototype.getPriority = function() {
+    return this.priority_;
+};
+
 FrettedBuildModel.prototype.serialize = function() {
     return {
         displayName: this.displayName,
@@ -82,6 +89,22 @@ FrettedBuildModel.prototype.serialize = function() {
  */
 FrettedBuildModel.prototype.clone = function() {
     return _.extend(new FrettedBuildModel(), utils.clone(this));
+};
+
+/**
+ * @param {boolean} value
+ * @returns {FrettedBuildModel}
+ */
+FrettedBuildModel.prototype.setDerived = function(value) {
+    this.derived_ = false;
+    return this;
+};
+
+/**
+ * @returns {boolean}
+ */
+FrettedBuildModel.prototype.isDerived = function() {
+    return this.derived_;
 };
 
 /**
@@ -116,58 +139,47 @@ FrettedBuildModel.prototype.setDisplayName = function(value) {
  * @returns {FrettedBuildModel}
  */
 FrettedBuildModel.prototype.alternates = function(map) {
-    var alts = _.sortBy(this.alternateDefinitions_, 'priority_');
-    // console.log(alts);
     return this;
 };
 
-FrettedBuildModel.prototype.buildUsingPointers = function(map, results, listItem) {
+FrettedBuildModel.prototype.buildUsingPointers = function(map, results, listItem, insertionIndex) {
     if (!_.isEmpty(this.derivatePointerNotes_)) {
         // console.log(this.name, 'has', this.derivatePointerNotes_.length, 'alternate sources');
         // var distance = notes.distanceInSemitones()
     }
 
-    _.forEach(this.derivatePointerNotes_, function(pointerBassNote) {
-        // TODO: offset distance according to bass of first string
+    _.forEach(this.derivatePointerNotes_, function(pointerBassNote, pointerBassIndex) {
         var sourceName = music.transformChord(this.name, pointerBassNote);
         var sourceList = map[sourceName];
         if (_.isEmpty(sourceList)) {
             console.log('failed finding source', this.name, sourceName);
             return;
         }
-
-        var created = _.chain(sourceList)
-          .map(function(chord) {
-              var firstStringNote = chord.getFirstNote();
-              // console.log(this.name, sourceName, firstStringNote);
-              if (_.isNull(firstStringNote)) {
-                  console.log('mapped to chord with no frets', this.name, sourceName);
-                  return null;
-              }
-              var distance = music.positiveDistanceInSemitones(firstStringNote, this.name);
-              return chord.clone()
+        var createdCount = 0;
+        _.forEach(sourceList, function(chord) {
+            var firstStringNote = chord.getFirstNote();
+            if (_.isNull(firstStringNote)) {
+                console.log('mapped to chord with no frets', this.name, sourceName);
+                return null;
+            }
+            var distance = music.positiveDistanceInSemitones(firstStringNote, this.name);
+            results.splice(insertionIndex + pointerBassIndex + createdCount++, 0,
+              chord.clone()
                 .setName(this.name)
                 .setDisplayName(this.displayName)
                 .deriveFrets(distance)
-                .deriveFingering();
-          }, this)
-          .compact()
-          .value();
-
-        if (!_.isEmpty(created)) {
-            results.splice(results.indexOf(listItem) + 1, 0, created);
-        }
-
-        //if (music.extractRoot(this.name) === 'C') {
-        //    _.forEach(created, function(c) {
-        //        console.log(c.serialize());
-        //    });
-        //    // console.log(JSON.stringify(created, null, 2));
-        //}
-
-
+                .deriveFingering()
+            );
+        }, this);
     }, this);
     return this;
+};
+
+/**
+ * @returns {boolean}
+ */
+FrettedBuildModel.prototype.isDefined = function() {
+    return !!this.getFirstNote();
 };
 
 FrettedBuildModel.prototype.getFirstNote = function() {
@@ -279,6 +291,12 @@ FrettedBuildModel.prototype.stringListParser = function(value, delimiter) {
       .value();
 
     return _.isEmpty(ret) ? null : ret;
+};
+
+FrettedBuildModel.prototype.valueOf = function() {
+    var frets = this.own_.frets ? this.own_.frets.join(',') : 'undefined';
+    var fingering = this.own_.fingering ? this.own_.fingering.join(',') : 'undefined';
+    return frets + ':' + fingering;
 };
 
 
