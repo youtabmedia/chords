@@ -162,7 +162,7 @@ FrettedBuildModel.prototype.buildUsingPointers = function(map, results, listItem
                 console.log('mapped to chord with no frets', this.name, sourceName);
                 return null;
             }
-            var distance = music.positiveDistanceInSemitones(firstStringNote, this.name);
+            var distance = music.positiveDistanceInSemitones(firstStringNote, this.bass_ || this.name);
             results.splice(insertionIndex + pointerBassIndex + createdCount++, 0,
               chord.clone()
                 .setName(this.name)
