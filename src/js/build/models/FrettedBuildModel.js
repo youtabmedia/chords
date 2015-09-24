@@ -240,11 +240,7 @@ FrettedBuildModel.prototype.register = function(map) {
         }
 
         _.forEach(_.zip(roots, basses), function(rootBass) {
-            var nc = this.registerAlias_(rootBass[0] + alias.substring(rootBass[0].length), rootBass[1], map);
-            if ((alias === 'Eb' || alias === 'D#') && rootBass[1] === null) {
-                console.log(rootBass);
-                console.log(nc);
-            }
+            this.registerAlias_(rootBass[0] + alias.substring(rootBass[0].length), rootBass[1], map);
         }, this);
 
     }, this);
