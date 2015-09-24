@@ -253,10 +253,6 @@ FrettedBuildModel.prototype.register = function(map) {
 
 FrettedBuildModel.prototype.registerAlias_ = function(alias, bass, map) {
     var name = alias + (bass ? ('/' + bass) : '');
-    if (map[name] && _.isEmpty(this.own_.frets)) {
-        return;
-    }
-
     var list = map[name] || [];
     var ret = this.clone()
       .setBass(bass)
