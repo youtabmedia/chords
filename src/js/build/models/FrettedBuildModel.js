@@ -231,29 +231,44 @@ FrettedBuildModel.prototype.deriveFingering = function() {
  */
 FrettedBuildModel.prototype.register = function(map) {
     _.forEach(this.verifiedAliases_, function(alias) {
-        if (music.extractRoot(alias) === this.bass_) {
-            // not a slash chord
-            this.registerAlias_(alias, null, map);
-        } else {
-            // slash chord
-            this.registerAlias_(alias, this.bass_, map);
-            // if slash chord is an accidental register the respective opposite
-            if (music.isAccidental(this.bass_)) {
-                this.registerAlias_(alias, music.reverseAccidental(this.bass_), map);
-            }
+        var root = music.extractRoot(alias);
+        var roots = [root, music.reverseAccidental(root)];
+        var basses = [null, null];
+        if (root !== this.bass_) {
+            roots = roots.concat(roots);
+            basses = [this.bass_, this.bass_, music.reverseAccidental(this.bass_), music.reverseAccidental(this.bass_)];
         }
+
+        _.forEach(_.zip(roots, basses), function(rootBass) {
+            this.registerAlias_(rootBass[0] + alias.substring(rootBass[0].length), rootBass[1], map);
+        }, this);
+
+        //if (music.extractRoot(alias) === this.bass_) {
+        //    // not a slash chord
+        //    this.registerAlias_(alias, null, map);
+        //    var root = music.extractRoot(alias);
+        //    if (music.isAccidental(root)) {
+        //        // register accidental
+        //        this.registerAlias_(music.reverseAccidental(root) + alias.substring(2), null, map);
+        //    }
+        //} else {
+        //    // slash chord
+        //    this.registerAlias_(alias, this.bass_, map);
+        //    // if slash chord is an accidental register the respective opposite
+        //    if (music.isAccidental(this.bass_)) {
+        //        this.registerAlias_(alias, music.reverseAccidental(this.bass_), map);
+        //    }
+        //}
     }, this);
     return this;
 };
 
 FrettedBuildModel.prototype.registerAlias_ = function(alias, bass, map) {
     var name = alias + (bass ? ('/' + bass) : '');
-    var list = map[name] || [];
-    list.push(this.clone()
-        .setBass(bass)
-        .setName(name)
-    );
-    map[name] = list;
+    map[name] = [this.clone()
+      .setBass(bass)
+      .setName(name)
+    ];
 };
 
 /**
