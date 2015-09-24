@@ -2,9 +2,9 @@
   "name": "node-guitar-chords",
   "version": "0.0.0",
   "description": "A chord library for use in musical applications",
-  "main": "index.js",
+  "main": "./index.js",
   "scripts": {
-    "install": "node src/js/build/index.js",
+    "preinstall": "node src/js/build/index.js",
     "serve": "node server/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
