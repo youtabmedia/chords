@@ -60,10 +60,10 @@ FrettedBuildModel.prototype.deserialize = function(row, prev) {
         return false;
     }, this);
 
-    if (_.isEmpty(this.verifiedAliases_)) {
-        console.log('invalid aliases', invalidAliases);
-        console.log('----');
-    }
+    //if (_.isEmpty(this.verifiedAliases_)) {
+    //    console.log('invalid aliases', invalidAliases);
+    //    console.log('----');
+    //}
     return this;
 };
 
@@ -240,7 +240,11 @@ FrettedBuildModel.prototype.register = function(map) {
         }
 
         _.forEach(_.zip(roots, basses), function(rootBass) {
-            this.registerAlias_(rootBass[0] + alias.substring(rootBass[0].length), rootBass[1], map);
+            var nc = this.registerAlias_(rootBass[0] + alias.substring(rootBass[0].length), rootBass[1], map);
+            if ((alias === 'Eb' || alias === 'D#') && rootBass[1] === null) {
+                console.log(rootBass);
+                console.log(nc);
+            }
         }, this);
 
     }, this);
@@ -249,10 +253,18 @@ FrettedBuildModel.prototype.register = function(map) {
 
 FrettedBuildModel.prototype.registerAlias_ = function(alias, bass, map) {
     var name = alias + (bass ? ('/' + bass) : '');
-    map[name] = [this.clone()
+    if (map[name] && _.isEmpty(this.own_.frets)) {
+        return;
+    }
+
+    var list = map[name] || [];
+    var ret = this.clone()
       .setBass(bass)
-      .setName(name)
-    ];
+      .setName(name);
+    list.push(ret);
+    map[name] = list;
+
+    return ret;
 };
 
 /**
